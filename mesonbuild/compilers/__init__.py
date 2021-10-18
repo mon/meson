@@ -118,8 +118,8 @@ __all__ = [
     'CcrxCPPCompiler',
     'Xc16CCompiler',
     'CompCertCCompiler',
-    'C2000CCompiler',
-    'C2000CPPCompiler',
+    'TICCompiler',
+    'TICPPCompiler',
     'SunFortranCompiler',
     'SwiftCompiler',
     'ValaCompiler',
@@ -187,7 +187,7 @@ from .c import (
     CcrxCCompiler,
     Xc16CCompiler,
     CompCertCCompiler,
-    C2000CCompiler,
+    TICCompiler,
     VisualStudioCCompiler,
 )
 from .cpp import (
@@ -205,7 +205,7 @@ from .cpp import (
     NvidiaHPC_CPPCompiler,
     PGICPPCompiler,
     CcrxCPPCompiler,
-    C2000CPPCompiler,
+    TICPPCompiler,
     VisualStudioCPPCompiler,
 )
 from .cs import MonoCompiler, VisualStudioCsCompiler

@@ -31,8 +31,8 @@ from ..linkers import (
     CcrxDynamicLinker,
     CompCertLinker,
     CompCertDynamicLinker,
-    C2000Linker,
-    C2000DynamicLinker,
+    TILinker,
+    TIDynamicLinker,
     DLinker,
     NAGDynamicLinker,
     NvidiaHPC_DynamicLinker,
@@ -66,7 +66,7 @@ from .c import (
     CcrxCCompiler,
     Xc16CCompiler,
     CompCertCCompiler,
-    C2000CCompiler,
+    TICCompiler,
     VisualStudioCCompiler,
 )
 from .cpp import (
@@ -84,7 +84,7 @@ from .cpp import (
     NvidiaHPC_CPPCompiler,
     PGICPPCompiler,
     CcrxCPPCompiler,
-    C2000CPPCompiler,
+    TICPPCompiler,
     VisualStudioCPPCompiler,
 )
 from .cs import MonoCompiler, VisualStudioCsCompiler
@@ -296,7 +296,7 @@ def detect_static_linker(env: 'Environment', compiler: Compiler) -> StaticLinker
 
         if any(os.path.basename(x) in {'lib', 'lib.exe', 'llvm-lib', 'llvm-lib.exe', 'xilib', 'xilib.exe'} for x in linker):
             arg = '/?'
-        elif 'ar2000' in linker_name:
+        elif 'ar2000' in linker_name or 'ar430' in linker_name:
             arg = '?'
         else:
             arg = '--version'
@@ -326,8 +326,8 @@ def detect_static_linker(env: 'Environment', compiler: Compiler) -> StaticLinker
             return CcrxLinker(linker)
         if out.startswith('GNU ar') and 'xc16-ar' in linker_name:
             return Xc16Linker(linker)
-        if out.startswith('TMS320C2000') and 'ar2000' in linker_name:
-            return C2000Linker(linker)
+        if 'Texas Instruments Incorporated' in out:
+            return TILinker(linker)
         if out.startswith('The CompCert'):
             return CompCertLinker(linker)
         if p.returncode == 0:
@@ -396,7 +396,8 @@ def _detect_c_or_cpp_compiler(env: 'Environment', lang: str, for_machine: Machin
             arg = '--version'
         elif 'ccomp' in compiler_name:
             arg = '-version'
-        elif 'cl2000' in compiler_name:
+        elif 'cl2000' in compiler_name or 'cl430' in compiler_name:
+            # TI compiler
             arg = '-version'
         elif compiler_name in {'icl', 'icl.exe'}:
             # if you pass anything to icl you get stuck in a pager
@@ -618,10 +619,10 @@ def _detect_c_or_cpp_compiler(env: 'Environment', lang: str, for_machine: Machin
                 ccache + compiler, version, for_machine, is_cross, info,
                 exe_wrap, full_version=full_version, linker=linker)
 
-        if 'TMS320C2000 C/C++' in out:
-            cls = C2000CCompiler if lang == 'c' else C2000CPPCompiler
+        if 'TMS320C2000 C/C++' in out or 'MSP430 C/C++' in out:
+            cls = TICCompiler if lang == 'c' else TICPPCompiler
             env.coredata.add_lang_args(cls.language, cls, for_machine, env)
-            linker = C2000DynamicLinker(compiler, for_machine, version=version)
+            linker = TIDynamicLinker(compiler, for_machine, version=version)
             return cls(
                 ccache + compiler, version, for_machine, is_cross, info,
                 exe_wrap, full_version=full_version, linker=linker)
