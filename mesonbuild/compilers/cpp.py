@@ -846,13 +846,8 @@ class TICPPCompiler(TICompiler, CPPCompiler):
             args.append('--' + std.value)
         return args
 
-    def get_no_optimization_args(self) -> T.List[str]:
-        return ['-Ooff']
+    def get_always_args(self) -> T.List[str]:
+        return []
 
-    def get_output_args(self, target: str) -> T.List[str]:
-        return [f'--output_file={target}']
-
-    def get_include_args(self, path: str, is_system: bool) -> T.List[str]:
-        if path == '':
-            path = '.'
-        return ['--include_path=' + path]
+    def get_option_link_args(self, options: 'KeyedOptionDictType') -> T.List[str]:
+        return []

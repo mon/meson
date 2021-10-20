@@ -101,6 +101,23 @@ class TICompiler(Compiler):
     def get_debug_args(self, is_debug: bool) -> T.List[str]:
         return ti_debug_args[is_debug]
 
+    def get_compile_only_args(self) -> T.List[str]:
+        return []
+
+    def get_no_optimization_args(self) -> T.List[str]:
+        return ['-Ooff']
+
+    def get_output_args(self, target: str) -> T.List[str]:
+        return [f'--output_file={target}']
+
+    def get_werror_args(self) -> T.List[str]:
+        return ['--emit_warnings_as_errors']
+
+    def get_include_args(self, path: str, is_system: bool) -> T.List[str]:
+        if path == '':
+            path = '.'
+        return ['-I=' + path]
+
     @classmethod
     def unix_args_to_native(cls, args: T.List[str]) -> T.List[str]:
         result = []
