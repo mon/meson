@@ -851,3 +851,7 @@ class TICPPCompiler(TICompiler, CPPCompiler):
 
     def get_option_link_args(self, options: 'KeyedOptionDictType') -> T.List[str]:
         return []
+
+class C2000CPPCompiler(TICPPCompiler):
+    # Required for backwards compat with projects created before ti-cgt support existed
+    id = 'c2000'

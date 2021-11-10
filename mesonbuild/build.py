@@ -1785,8 +1785,8 @@ class Executable(BuildTarget):
                 self.suffix = 'abs'
             elif ('c' in self.compilers and self.compilers['c'].get_id().startswith('xc16')):
                 self.suffix = 'elf'
-            elif ('c' in self.compilers and self.compilers['c'].get_id() == 'ti' or
-                  'cpp' in self.compilers and self.compilers['cpp'].get_id() == 'ti'):
+            elif ('c' in self.compilers and self.compilers['c'].get_id() in ('ti', 'c2000') or
+                  'cpp' in self.compilers and self.compilers['cpp'].get_id() in ('ti', 'c2000')):
                 self.suffix = 'out'
             else:
                 self.suffix = environment.machines[for_machine].get_exe_suffix()

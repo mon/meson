@@ -7,7 +7,7 @@ ar     = ar430
 strip  = strip430
 
 [host_machine]
-system = 'bare metal'
+system = 'baremetal'
 cpu_family = 'msp430'
 endian = 'little'
 

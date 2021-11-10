@@ -702,3 +702,7 @@ class TICCompiler(TICompiler, CCompiler):
         if std.value != 'none':
             args.append('--' + std.value)
         return args
+
+class C2000CCompiler(TICCompiler):
+    # Required for backwards compat with projects created before ti-cgt support existed
+    id = 'c2000'

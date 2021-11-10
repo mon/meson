@@ -304,6 +304,11 @@ class TILinker(StaticLinker):
         return ['-r']
 
 
+class C2000Linker(TILinker):
+    # Required for backwards compat with projects created before ti-cgt support existed
+    id = 'ar2000'
+
+
 class AIXArLinker(ArLikeLinker):
     id = 'aixar'
     std_args = ['-csr', '-Xany']
@@ -1007,6 +1012,11 @@ class TIDynamicLinker(DynamicLinker):
 
     def get_always_args(self) -> T.List[str]:
         return []
+
+
+class C2000DynamicLinker(TIDynamicLinker):
+    # Required for backwards compat with projects created before ti-cgt support existed
+    id = 'cl2000'
 
 
 class ArmDynamicLinker(PosixDynamicLinkerMixin, DynamicLinker):

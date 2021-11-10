@@ -31,6 +31,7 @@ These are return values of the `get_id` (Compiler family) and
 | pgi       | Portland PGI C/C++/Fortran compilers |             |
 | rustc     | Rust compiler                    |                 |
 | sun       | Sun Fortran compiler             |                 |
+| c2000     | Texas Instruments C/C++ Compiler (C2000) |                 |
 | ti        | Texas Instruments C/C++ Compiler |                 |
 | valac     | Vala compiler                    |                 |
 | xc16      | Microchip XC16 C compiler        |                 |
@@ -54,7 +55,8 @@ These are return values of the `get_linker_id` method in a compiler object.
 | optlink    | optlink (used with DMD)                     |
 | rlink      | The Renesas linker, used with CCrx only     |
 | xc16-ar    | The Microchip linker, used with XC16 only   |
-| ti-ar      | The Texas Instruments linker, used with C2000/MSP430 only |
+| ar2000     | The Texas Instruments linker, used with C2000 only |
+| ti-ar      | The Texas Instruments linker, used with MSP430 only |
 | armlink    | The ARM linker (arm and armclang compilers) |
 | pgi        | Portland/Nvidia PGI                         |
 | nvlink     | Nvidia Linker used with cuda                |
