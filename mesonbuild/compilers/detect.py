@@ -300,7 +300,7 @@ def detect_static_linker(env: 'Environment', compiler: Compiler) -> StaticLinker
 
         if any(os.path.basename(x) in {'lib', 'lib.exe', 'llvm-lib', 'llvm-lib.exe', 'xilib', 'xilib.exe'} for x in linker):
             arg = '/?'
-        elif 'ar2000' in linker_name or 'ar430' in linker_name:
+        elif linker_name in {'ar2000', 'ar2000.exe', 'ar430', 'ar430.exe', 'armar', 'armar.exe'}:
             arg = '?'
         else:
             arg = '--version'
@@ -403,7 +403,7 @@ def _detect_c_or_cpp_compiler(env: 'Environment', lang: str, for_machine: Machin
             arg = '--version'
         elif 'ccomp' in compiler_name:
             arg = '-version'
-        elif 'cl2000' in compiler_name or 'cl430' in compiler_name:
+        elif compiler_name in {'cl2000', 'cl2000.exe', 'cl430', 'cl430.exe', 'armcl', 'armcl.exe'}:
             # TI compiler
             arg = '-version'
         elif compiler_name in {'icl', 'icl.exe'}:
@@ -595,6 +595,19 @@ def _detect_c_or_cpp_compiler(env: 'Environment', lang: str, for_machine: Machin
             return cls(
                 ccache + compiler, version, for_machine, is_cross, info,
                 exe_wrap, full_version=full_version, linker=l)
+        if 'TMS320C2000 C/C++' in out or 'MSP430 C/C++' in out or 'TI ARM C/C++ Compiler' in out:
+            if 'TMS320C2000 C/C++' in out:
+                cls = C2000CCompiler if lang == 'c' else C2000CPPCompiler
+                lnk = C2000DynamicLinker
+            else:
+                cls = TICCompiler if lang == 'c' else TICPPCompiler
+                lnk = TIDynamicLinker
+
+            env.coredata.add_lang_args(cls.language, cls, for_machine, env)
+            linker = lnk(compiler, for_machine, version=version)
+            return cls(
+                ccache + compiler, version, for_machine, is_cross, info,
+                exe_wrap, full_version=full_version, linker=linker)
         if 'ARM' in out:
             cls = ArmCCompiler if lang == 'c' else ArmCPPCompiler
             env.coredata.add_lang_args(cls.language, cls, for_machine, env)
@@ -622,20 +635,6 @@ def _detect_c_or_cpp_compiler(env: 'Environment', lang: str, for_machine: Machin
             cls = CompCertCCompiler
             env.coredata.add_lang_args(cls.language, cls, for_machine, env)
             linker = CompCertDynamicLinker(for_machine, version=version)
-            return cls(
-                ccache + compiler, version, for_machine, is_cross, info,
-                exe_wrap, full_version=full_version, linker=linker)
-
-        if 'TMS320C2000 C/C++' in out or 'MSP430 C/C++' in out:
-            if 'TMS320C2000 C/C++' in out:
-                cls = C2000CCompiler if lang == 'c' else C2000CPPCompiler
-                lnk = C2000DynamicLinker
-            else:
-                cls = TICCompiler if lang == 'c' else TICPPCompiler
-                lnk = TIDynamicLinker
-
-            env.coredata.add_lang_args(cls.language, cls, for_machine, env)
-            linker = lnk(compiler, for_machine, version=version)
             return cls(
                 ccache + compiler, version, for_machine, is_cross, info,
                 exe_wrap, full_version=full_version, linker=linker)
