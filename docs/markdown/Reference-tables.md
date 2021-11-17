@@ -56,7 +56,7 @@ These are return values of the `get_linker_id` method in a compiler object.
 | rlink      | The Renesas linker, used with CCrx only     |
 | xc16-ar    | The Microchip linker, used with XC16 only   |
 | ar2000     | The Texas Instruments linker, used with C2000 only |
-| ti-ar      | The Texas Instruments linker, used with MSP430 only |
+| ti-ar      | The Texas Instruments linker |
 | armlink    | The ARM linker (arm and armclang compilers) |
 | pgi        | Portland/Nvidia PGI                         |
 | nvlink     | Nvidia Linker used with cuda                |
