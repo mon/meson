@@ -364,8 +364,12 @@ class Resolver:
         # definitely cannot try to conveniently set up a submodule.
         if not GIT:
             return False
+        # Does the directory exist? Even uninitialised submodules checkout an
+        # empty directory to work in
+        if not os.path.isdir(self.dirname):
+            return False
         # Are we in a git repository?
-        ret, out = quiet_git(['rev-parse'], Path(self.dirname).parent)
+        ret, out = quiet_git(['rev-parse'], str(Path(self.dirname).parent))
         if not ret:
             return False
         # Is `dirname` a submodule?
