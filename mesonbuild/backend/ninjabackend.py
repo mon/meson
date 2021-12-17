@@ -47,7 +47,7 @@ from ..mesonlib import (
 )
 from ..mesonlib import get_compiler_for_source, has_path_sep, OptionKey
 from .backends import CleanTrees
-from ..build import GeneratedList, InvalidArguments, ExtractedObjects
+from ..build import GeneratedFile, GeneratedList, InvalidArguments, ExtractedObjects
 from ..interpreter import Interpreter
 
 if T.TYPE_CHECKING:
@@ -2201,6 +2201,11 @@ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47485'''))
         return args
 
     def generate_genlist_for_target(self, genlist, target):
+        # first generate any chained dependencies
+        for dep in genlist.depends:
+            if isinstance(dep, GeneratedList):
+                self.generate_genlist_for_target(dep, target)
+
         generator = genlist.get_generator()
         subdir = genlist.subdir
         exe = generator.get_exe()
@@ -2213,7 +2218,11 @@ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47485'''))
                 sole_output = os.path.join(self.get_target_private_dir(target), outfilelist[i])
             else:
                 sole_output = f'{curfile}'
-            infilename = curfile.rel_to_builddir(self.build_to_src)
+            if isinstance(curfile, GeneratedFile):
+                file = curfile.to_file(self.get_target_private_dir(target))
+            else:
+                file = curfile
+            infilename = file.rel_to_builddir(self.build_to_src)
             base_args = generator.get_arglist(infilename)
             outfiles = genlist.get_outputs_for(curfile)
             outfiles = [os.path.join(self.get_target_private_dir(target), of) for of in outfiles]

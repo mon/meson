@@ -1215,6 +1215,11 @@ class XCodeBackend(backends.Backend):
                     generator_id += 1
 
     def generate_single_generator_phase(self, tname, t, genlist, generator_id, objects_dict):
+        # first generate any chained dependencies
+        for dep in genlist.depends:
+            if isinstance(dep, build.GeneratedList):
+                self.generate_single_generator_phase(dep, t)
+
         generator = genlist.get_generator()
         exe = generator.get_exe()
         exe_arr = self.build_target_to_cmd_array(exe)
@@ -1236,11 +1241,15 @@ class XCodeBackend(backends.Backend):
         for of in ofile_abs:
             outarray.add_item(of)
         for i in infilelist:
+            if isinstance(i, build.GeneratedFile):
+                file = i.to_file(self.get_target_private_dir(t))
+            else:
+                file = i
             # This might be needed to be added to inputPaths. It's not done yet as it is
             # unclear whether it is necessary, what actually happens when it is defined
             # and currently the build works without it.
-            #infile_abs = i.absolute_path(self.environment.get_source_dir(), self.environment.get_build_dir())
-            infilename = i.rel_to_builddir(self.build_to_src)
+            #infile_abs = file.absolute_path(self.environment.get_source_dir(), self.environment.get_build_dir())
+            infilename = file.rel_to_builddir(self.build_to_src)
             base_args = generator.get_arglist(infilename)
             for o_base in genlist.get_outputs_for(i):
                 o = os.path.join(self.get_target_private_dir(t), o_base)

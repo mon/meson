@@ -50,7 +50,7 @@ if T.TYPE_CHECKING:
     from .modules import ModuleState
     from .mparser import BaseNode
 
-    GeneratedTypes = T.Union['build.BuildTarget', 'CustomTarget', 'CustomTargetIndex', 'GeneratedList']
+    GeneratedTypes = T.Union['BuildTarget', 'CustomTarget', 'CustomTargetIndex', 'GeneratedList']
 
 pch_kwargs = {'c_pch', 'cpp_pch'}
 
@@ -1615,6 +1615,20 @@ You probably should put it in link_with instead.''')
                             'use shared_libary() with `override_options: [\'b_lundef=false\']` instead.')
                     link_target.backwards_compat_want_soname = True
 
+class GeneratedFile(HoldableObject):
+    '''
+    Used only for generator outputs used as an input to *another* generator, so
+    the private directory path can be propagated correctly.
+    '''
+    def __init__(self, fname):
+        self.fname = fname
+
+    def to_file(self, private_dir: str) -> File:
+        return File.from_built_file(private_dir, self.fname)
+
+    def __str__(self) -> str:
+        return self.fname
+
 class Generator(HoldableObject):
     def __init__(self, exe: T.Union['Executable', programs.ExternalProgram],
                  arguments: T.List[str],
@@ -1669,14 +1683,15 @@ class Generator(HoldableObject):
         output = GeneratedList(self, state.subdir, preserve_path_from, extra_args=extra_args if extra_args is not None else [])
 
         for e in files:
-            if isinstance(e, (BuildTarget, CustomTarget)):
+            if isinstance(e, (BuildTarget, CustomTarget, GeneratedList)):
                 output.depends.add(e)
             if isinstance(e, CustomTargetIndex):
                 output.depends.add(e.target)
 
-            if isinstance(e, (BuildTarget, CustomTarget, CustomTargetIndex, GeneratedList)):
-                self.depends.append(e) # BUG: this should go in the GeneratedList object, not this object.
+            if isinstance(e, (BuildTarget, CustomTarget, CustomTargetIndex)):
                 fs = [File.from_built_file(state.subdir, f) for f in e.get_outputs()]
+            elif isinstance(e, GeneratedList):
+                fs = [GeneratedFile(f) for f in e.get_outputs()]
             elif isinstance(e, str):
                 fs = [File.from_source_file(state.environment.source_dir, state.subdir, e)]
             else:
@@ -1729,7 +1744,7 @@ class GeneratedList(HoldableObject):
             result.append(os.path.join(path_segment, of))
         return result
 
-    def add_file(self, newfile: File, state: T.Union['Interpreter', 'ModuleState']) -> None:
+    def add_file(self, newfile: T.Union[File, 'GeneratedFile'], state: T.Union['Interpreter', 'ModuleState']) -> None:
         self.infilelist.append(newfile)
         outfiles = self.generator.get_base_outnames(newfile.fname)
         if self.preserve_path_from:
@@ -1737,13 +1752,13 @@ class GeneratedList(HoldableObject):
         self.outfilelist += outfiles
         self.outmap[newfile] = outfiles
 
-    def get_inputs(self) -> T.List['File']:
+    def get_inputs(self) -> T.List[T.Union[File, 'GeneratedFile']]:
         return self.infilelist
 
     def get_outputs(self) -> T.List[str]:
         return self.outfilelist
 
-    def get_outputs_for(self, filename: 'File') -> T.List[str]:
+    def get_outputs_for(self, filename: T.Union[File, 'GeneratedFile']) -> T.List[str]:
         return self.outmap[filename]
 
     def get_generator(self) -> 'Generator':

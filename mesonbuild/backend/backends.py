@@ -307,10 +307,10 @@ class Backend:
     def generate(self) -> None:
         raise RuntimeError(f'generate is not implemented in {type(self).__name__}')
 
-    def get_target_filename(self, t: T.Union[build.Target, build.CustomTargetIndex], *, warn_multi_output: bool = True) -> str:
-        if isinstance(t, build.CustomTarget):
+    def get_target_filename(self, t: T.Union[build.Target, build.CustomTargetIndex, build.GeneratedList], *, warn_multi_output: bool = True) -> str:
+        if isinstance(t, (build.CustomTarget, build.GeneratedList)):
             if warn_multi_output and len(t.get_outputs()) != 1:
-                mlog.warning(f'custom_target {t.name!r} has more than one output! '
+                mlog.warning(f'{t.typename} {t.name!r} has more than one output! '
                              'Using the first one.')
             filename = t.get_outputs()[0]
         elif isinstance(t, build.CustomTargetIndex):
@@ -318,6 +318,7 @@ class Backend:
         else:
             assert isinstance(t, build.BuildTarget)
             filename = t.get_filename()
+
         return os.path.join(self.get_target_dir(t), filename)
 
     def get_target_filename_abs(self, target: T.Union[build.Target, build.CustomTargetIndex]) -> str:
@@ -417,7 +418,7 @@ class Backend:
     @lru_cache(maxsize=None)
     def get_target_generated_dir(
             self, target: T.Union[build.BuildTarget, build.CustomTarget, build.CustomTargetIndex],
-            gensrc: T.Union[build.CustomTarget, build.CustomTargetIndex, build.GeneratedList],
+            gensrc: T.Union[build.BuildTarget, build.CustomTarget, build.CustomTargetIndex, build.GeneratedList],
             src: str) -> str:
         """
         Takes a BuildTarget, a generator source (CustomTarget or GeneratedList),
